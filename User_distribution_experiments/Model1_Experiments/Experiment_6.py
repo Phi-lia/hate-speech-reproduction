@@ -63,7 +63,13 @@ def train_LSTM_Cross_Domain(tweets_train,tweets_test,MAX_SEQUENCE_LENGTH,vocab):
         X_train, y_train = gen_data(tweets_train,word2vec_model,flag)
         X_test, y_test = gen_data(tweets_test,word2vec_model,flag)
         
-        precision, recall, f1_score, acc, p_weighted, p_macro, r_weighted, r1_macro, f1_weighted, f11_macro = gradient_boosting_classifier(X_train, y_train, X_test, y_test, 'binary')
+        import xgboost as xgb
+        clf = xgb.XGBClassifier(use_label_encoder=False)
+        clf.fit(X_train, y_train)
+        model=clf
+        precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_train, y_train, 'binary','train')
+        precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_test[3001:,:], y_test[3001:], 'binary','dev')
+        precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_test[:3001,:], y_test[:3001], 'binary','test')
         a += acc
         p += p_weighted
         p1 += p_macro
@@ -86,7 +92,7 @@ if __name__ == "__main__":
     OPTIMIZER = 'adam'
     INITIALIZE_WEIGHTS_WITH = 'glove'
     LEARN_EMBEDDINGS = True
-    EPOCHS = 10
+    EPOCHS = 100
     BATCH_SIZE = 128
     SCALE_LOSS_FUN = None
     SEED = 42
