@@ -1,5 +1,6 @@
 #from data_handler import *
 import argparse
+from numpy import savetxt
 from netcal.metrics import ECE
 import tensorflow.keras
 import numpy as np
@@ -155,7 +156,7 @@ def load_vec(emb_path,lang, nmax=50000):
 
 #ita_embeddings, ita_id2word, ita_word2id = load_vec('../Vectors/wiki.multi.it.vec.txt','ita')
 #es_embeddings, es_id2word, es_word2id = load_vec('../Vectors/wiki.multi.es.vec.txt','es')
-en_embeddings, en_id2word, en_word2id = load_vec('../Vectors/wiki.en.vec','en')
+en_embeddings, en_id2word, en_word2id = load_vec('drive/My Drive/Colab Notebooks/hate_speech_data/Vectors/wiki.en.vec','en')
 
 freq = defaultdict(int)
 EMBEDDING_DIM = 200
@@ -176,7 +177,7 @@ def gradient_boosting_classifier(X_train, y_train):
     return clf
 
 
-def evaluate_model(model, testX, testY,flag):
+def evaluate_model(model, testX, testY,flag,m):
     if flag=='binary':
         temp = model.predict(testX)
         y_pred = []
@@ -210,7 +211,21 @@ def evaluate_model(model, testX, testY,flag):
                 y_pred.append(1)
             else:
                 y_pred.append(i)
-        
+    print(temp)
+    print(temp.size)
+    logits = np.append(temp.reshape(-1,1), np.zeros([temp.size,1]),axis=1)
+    logits[:,1] = 1-logits[:,0]
+    logits[:,[0, 1]] = logits[:,[1, 0]]
+    if m=="test":
+        savetxt('groundTruth_test_1.csv', y_true, delimiter=',')
+        savetxt('logits_test_1.csv', logits, delimiter=',')
+    if m=="train":
+        savetxt('groundTruth_train_1.csv', y_true, delimiter=',')
+        savetxt('logits_train_1.csv', logits, delimiter=',')
+    if m=="dev":
+        savetxt('groundTruth_dev_1.csv', y_true, delimiter=',')
+        savetxt('logits_dev_1.csv', logits, delimiter=',')
+    
     precision = metrics.precision_score(y_true, y_pred, average=None)
     recall = metrics.recall_score(y_true, y_pred, average=None)
     f1_score = metrics.f1_score(y_true, y_pred, average=None)
@@ -862,9 +877,9 @@ def load_data(dataset):
 def get_data_waseem4(dataset, s):
     tweets=[]
     if dataset == 'data_new':
-        data = pickle.load(open('../Data/Data_new.pkl', 'rb'))
+        data = pickle.load(open('drive/My Drive/Colab Notebooks/hate_speech_data/Data/Data_new.pkl', 'rb'))
     elif dataset == 'waseem':
-        data = pickle.load(open('../Data/Waseem_Dataset.pkl', 'rb'))
+        data = pickle.load(open('drive/My Drive/Colab Notebooks/hate_speech_data/Data/Waseem_Dataset.pkl', 'rb'))
     elif dataset == 'esp':
         data = pickle.load(open('../Data/espanol.pkl', 'rb'))
     elif dataset == 'espanol_ingles':
@@ -903,7 +918,7 @@ def get_data_waseem4(dataset, s):
     elif dataset == 'sem_eval':
         #data = pickle.load(open('../Data/SemEval_Dataset.pkl', 'rb'))
         
-        with open('../Data/en_dev.csv', 'r', encoding='utf-8') as f_in:
+        with open('drive/My Drive/Colab Notebooks/hate_speech_data/Data/en_test.csv', 'r', encoding='utf-8') as f_in:
             data = f_in.readlines()
             for tweet_full in data[1:len(data)]:
                 tweet = tweet_full.split(',')
