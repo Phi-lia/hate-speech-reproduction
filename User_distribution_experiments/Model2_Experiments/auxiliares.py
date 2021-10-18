@@ -186,14 +186,14 @@ def evaluate_model(model, testX, testY,flag, m):
             obj = pickle.load(fp)
         return obj
     save_object(y_pred, 'y_pred_texto.pkl')
-    return ece, precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem
+    return ece, precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem, model
 
 def load_data(dataset):
     x_text = []
     labels = []
     if dataset =='train':
         print("Loading data from file: " + dataset)
-        data = pickle.load(open('../Data/Waseem_Dataset.pkl', 'rb'))
+        data = pickle.load(open('drive/My Drive/Colab Notebooks/hate_speech_data/Data/Waseem_Dataset.pkl', 'rb'))
         print('len(dataaaaaa)')
         print(len(data))
         for i in range(len(data)):
@@ -203,12 +203,12 @@ def load_data(dataset):
         print("Loading data from file: " + dataset)
 #        with open('../Data/en_dev.json', 'r', encoding = 'utf-8') as sem_file:
 #            data = sem_file.readlines()
-        data = pickle.load(open('../Data/en_test.pkl', 'rb'))
+        data = pickle.load(open('drive/My Drive/Colab Notebooks/hate_speech_data/Data/en_test.pkl', 'rb'))
         print(data.loc[0,'text'])
         for i in range(len(data)):
             x_text.append(data.loc[i,'text'])
             labels.append(data.loc[i,'HS'])
-        data = pickle.load(open('../Data/en_dev.pkl', 'rb'))
+        data = pickle.load(open('drive/My Drive/Colab Notebooks/hate_speech_data/Data/en_dev.pkl', 'rb'))
         for i in range(len(data)):
             x_text.append(data.loc[i,'text'])
             labels.append(data.loc[i,'HS'])
@@ -218,7 +218,7 @@ def load_data(dataset):
             print("Loading data from file: " + dataset)
     #        with open('../Data/en_dev.json', 'r', encoding = 'utf-8') as sem_file:
     #            data = sem_file.readlines()
-            data = pickle.load(open('../Data/en_dev.pkl', 'rb'))
+            data = pickle.load(open('drive/My Drive/Colab Notebooks/hate_speech_data/Data/en_dev.pkl', 'rb'))
             print(data.loc[0,'text'])
             for i in range(len(data)):
                 x_text.append(data.loc[i,'text'])
@@ -226,7 +226,7 @@ def load_data(dataset):
                 
     elif dataset == 'data_new':
         print("Loading data from file: " + dataset)
-        data = pickle.load(open('../Data/Data_new.pkl', 'rb'))
+        data = pickle.load(open('drive/My Drive/Colab Notebooks/hate_speech_data/Data/Data_new.pkl', 'rb'))
         #print(data)
         for i in range(len(data)):
             x_text.append(data[i]['text'])
@@ -308,7 +308,7 @@ def get_model(m_type,inp_dim, vocab_size, embed_size, num_classes, learn_rate):
 
 models = ['cnn', 'lstm', 'blstm', 'blstm_attention']
 word_vectors = ["random", "glove" ,"sswe"]
-EPOCHS = 100
+EPOCHS = 10
 BATCH_SIZE = 512
 MAX_FEATURES = 2
 NUM_CLASSES = None
@@ -362,11 +362,12 @@ def train(data_dict, model_type, vector_type,flag, embed_size, dump_embeddings=F
             json.dump(vocab_processor.vocabulary_._reverse_mapping, fp)
     
     
-    print(testX)
-    print(testY)
-    ece2, precision2, recall2, f1_score2,precisionw2, recallw2, f1_scorew2,precisionm2, recallm2, f1_scorem2 =evaluate_model(model, trainX, trainY,flag,"train")
-    ece2, precision2, recall2, f1_score2,precisionw2, recallw2, f1_scorew2,precisionm2, recallm2, f1_scorem2 =evaluate_model(model, testX[3001:,:], testY[3001:],flag,"dev")
-    return  evaluate_model(model, testX[:3001,:], testY[:3001],flag,"test")
+    #print(testX)
+    #print(testY)
+    #ece2, precision2, recall2, f1_score2,precisionw2, recallw2, f1_scorew2,precisionm2, recallm2, f1_scorem2 =evaluate_model(model, trainX, trainY,flag,"train")
+    #ece2, precision2, recall2, f1_score2,precisionw2, recallw2, f1_scorew2,precisionm2, recallm2, f1_scorem2 =evaluate_model(model, testX[3001:,:], testY[3001:],flag,"dev")
+    #return  evaluate_model(model, testX[:3001,:], testY[:3001],flag,"test")
+    return  evaluate_model(model, testX, testY,flag,"other")
 
 def get_embedding_weights(filename, sep):
     embed_dict = {}
@@ -400,7 +401,7 @@ def get_embeddings_dict(vector_type, emb_dim):
     if vector_type == 'sswe':
         emb_dim==50
         sep = '\t'
-        vector_file = '../Vectors/sswe-u.txt'
+        vector_file = 'drive/My Drive/Colab Notebooks/hate_speech_data/Vectors/sswe-u.txt'
     elif vector_type =="glove":
         sep = ' '
         if data == "wiki":
@@ -522,7 +523,7 @@ def cv_sorted_data(x_text):
 
 def get_data_waseem3(s):
     tweets=[]
-    data = pickle.load(open('../Data/Waseem_Dataset.pkl', 'rb'))
+    data = pickle.load(open('drive/My Drive/Colab Notebooks/hate_speech_data/Data/Waseem_Dataset.pkl', 'rb'))
     for tweet_full in data:
     #tweet_full = json.loads(line)
         tweets.append({
