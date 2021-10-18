@@ -8,14 +8,15 @@ from models import *
 def run_model_exp1():        
     #Experimento 1 Cross-Validation
     tweets,_ = select_tweets('waseem',None)
-    
+    tweets_test,_ =  select_tweets('sem_eval',None)
+
     vocab = gen_vocab(tweets)
     
     MAX_SEQUENCE_LENGTH = max_len(tweets)
     
-    train_LSTM_variante1(tweets,vocab, MAX_SEQUENCE_LENGTH)
+    train_LSTM_variante1(tweets,tweets_test,vocab, MAX_SEQUENCE_LENGTH)
 
-def train_LSTM_variante1(tweets, vocab, MAX_SEQUENCE_LENGTH):
+def train_LSTM_variante1(tweets, tweets_test, vocab, MAX_SEQUENCE_LENGTH):
     #Step 1: Training the embeddings with all data
     a, p, r, f1 = 0., 0., 0., 0.
     a1, p1, r1, f11 = 0., 0., 0., 0.
@@ -28,6 +29,9 @@ def train_LSTM_variante1(tweets, vocab, MAX_SEQUENCE_LENGTH):
     
     y_train = y.reshape((len(y), 1))
     X_temp = np.hstack((X, y_train))
+
+    X_test, y_test = gen_sequence(tweets_test,vocab,'binary')
+    X_test = pad_sequences(X_test, maxlen=MAX_SEQUENCE_LENGTH)
    
     model = lstm_model(MAX_SEQUENCE_LENGTH, EMBEDDING_DIM,vocab)
     
@@ -58,34 +62,41 @@ def train_LSTM_variante1(tweets, vocab, MAX_SEQUENCE_LENGTH):
     tweets = select_tweets_whose_embedding_exists(tweets, word2vec_model)
 
     X, y = gen_data(tweets, word2vec_model,'binary')
+    X_test, y_test = gen_data(tweets_test,word2vec_model,'binary')
 
     cv_object = StratifiedKFold(n_splits=NO_OF_FOLDS, shuffle=True, random_state=42)
     
     for train_index, test_index in cv_object.split(X,y):
         X_train, y_train = X[train_index],y[train_index]
-        X_test, y_test = X[test_index],y[test_index]
+        #X_test, y_test = X[test_index],y[test_index]
         X_train, y_train = sklearn.utils.shuffle(X_train, y_train)
 
-        X_test, y_test = sklearn.utils.shuffle(X_test, y_test)
-        #print(y_train)
+        #X_test, y_test = sklearn.utils.shuffle(X_test, y_test)
+        # print('size')
+        # print(train_index)
+        # print(test_index)
         import xgboost as xgb
         clf = xgb.XGBClassifier(use_label_encoder=False)
         clf.fit(X_train, y_train)
         model=clf
         #model = gradient_boosting_classifier(X_train, y_train)
         print(5)
-        precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_test, y_test, 'binary')
+        #precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_train, y_train, 'binary', 'train')
+        #precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_test, y_test, 'binary', 'test')
         
-        p += precisionw
-        p1 += precisionm
-        r += recallw
-        r1 += recallm
-        f1 += f1_scorew
-        f11 += f1_scorem
-        pn += precision
-        rn += recall
-        fn += f1_score
-    print_scores(p, p1, r,r1, f1, f11,pn, rn, fn,NO_OF_FOLDS)
+    #     p += precisionw
+    #     p1 += precisionm
+    #     r += recallw
+    #     r1 += recallm
+    #     f1 += f1_scorew
+    #     f11 += f1_scorem
+    #     pn += precision
+    #     rn += recall
+    #     fn += f1_score
+    # print_scores(p, p1, r,r1, f1, f11,pn, rn, fn,NO_OF_FOLDS)
+    precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_train, y_train, 'binary', 'train')
+    precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_test[3001:,:], y_test[3001:], 'binary','dev')
+    precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_test[:3001,:], y_test[:3001], 'binary','test')
     
 if __name__ == "__main__":
     TOKENIZER = 'glove'
