@@ -211,11 +211,10 @@ def evaluate_model(model, testX, testY,flag,m):
                 y_pred.append(1)
             else:
                 y_pred.append(i)
-    print(temp)
-    print(temp.size)
-    logits = np.append(temp.reshape(-1,1), np.zeros([temp.size,1]),axis=1)
-    logits[:,1] = 1-logits[:,0]
-    logits[:,[0, 1]] = logits[:,[1, 0]]
+    
+    logits = model.predict_proba(testX)
+    print(logits)
+    
     if m=="test":
         savetxt('groundTruth_test_1.csv', y_true, delimiter=',')
         savetxt('logits_test_1.csv', logits, delimiter=',')
