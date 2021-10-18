@@ -40,9 +40,10 @@ def run_model_exp1(oversampling_rate, vector_type, embed_size,flag):
             else:
                 X_test.append(x_text[i])
                 y_test.append(labels[i])
-       
+        
+               
         data_dict = data_processor(x_text,X_train,y_train,X_test,y_test,flag)
-        ece, precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem = train(data_dict, model_type, vector_type,flag, embed_size)
+        ece, precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem, model = train(data_dict, model_type, vector_type,flag, embed_size)
         e += ece
         p += precisionw
         p1 += precisionm
@@ -54,6 +55,16 @@ def run_model_exp1(oversampling_rate, vector_type, embed_size,flag):
         rn += recall
         fn += f1_score
     print_scores(e, p, p1, r,r1, f1, f11,pn, rn, fn,NO_OF_FOLDS)
+    
+    X_test1, y_test1 = load_data('test')
+    data_dict = data_processor(x_text,X_train,y_train,X_test1,y_test1,flag)
+    testX1 = data_dict['testX']
+    testY1 = data_dict['testY']
+    trainX1 = data_dict['trainX']
+    trainY1 = data_dict['trainY']
+    evaluate_model(model, trainX1, trainY1,flag, "train")
+    evaluate_model(model, testX1[:3001,:], testY1[:3001],flag, 'test')
+    evaluate_model(model, testX1[3001:,:], testY1[3001:],flag, 'dev')
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Experiment 1. Original Experiment Replica')
