@@ -4,11 +4,20 @@ import numpy as np
 import pdb
 from auxiliares import *
 from models import *
+from numpy import savetxt
+import random
 
 def run_model_exp1():        
     #Experimento 1 Cross-Validation
     tweets,_ = select_tweets('waseem',None)
-    tweets_test,_ =  select_tweets('sem_eval',None)
+    random.shuffle(tweets)
+    tweets_test = tweets[7734:]
+    tweets = tweets[:7734]
+
+    print(tweets)
+    print(len(tweets))
+    print(tweets_test)
+    print(len(tweets_test))
 
     vocab = gen_vocab(tweets)
     
@@ -32,6 +41,9 @@ def train_LSTM_variante1(tweets, tweets_test, vocab, MAX_SEQUENCE_LENGTH):
 
     X_test, y_test = gen_sequence(tweets_test,vocab,'binary')
     X_test = pad_sequences(X_test, maxlen=MAX_SEQUENCE_LENGTH)
+
+    savetxt('ytest.csv', y_test, delimiter=',')
+    savetxt('ytrain.csv', y, delimiter=',')
    
     model = lstm_model(MAX_SEQUENCE_LENGTH, EMBEDDING_DIM,vocab)
     
@@ -51,7 +63,7 @@ def train_LSTM_variante1(tweets, tweets_test, vocab, MAX_SEQUENCE_LENGTH):
             loss, acc = model.train_on_batch(x, y_temp, class_weight=None)
 
   
-    tweets,_ = select_tweets('waseem', None)
+    #tweets,_ = select_tweets('waseem', None)
 
     #Extracting learned embeddings 
     wordEmb = model.layers[0].get_weights()[0]
@@ -63,6 +75,8 @@ def train_LSTM_variante1(tweets, tweets_test, vocab, MAX_SEQUENCE_LENGTH):
 
     X, y = gen_data(tweets, word2vec_model,'binary')
     X_test, y_test = gen_data(tweets_test,word2vec_model,'binary')
+
+    print(y_test)
 
     cv_object = StratifiedKFold(n_splits=NO_OF_FOLDS, shuffle=True, random_state=42)
     
@@ -94,9 +108,10 @@ def train_LSTM_variante1(tweets, tweets_test, vocab, MAX_SEQUENCE_LENGTH):
     #     rn += recall
     #     fn += f1_score
     # print_scores(p, p1, r,r1, f1, f11,pn, rn, fn,NO_OF_FOLDS)
+    
     precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_train, y_train, 'binary', 'train')
-    precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_test[3001:,:], y_test[3001:], 'binary','dev')
-    precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_test[:3001,:], y_test[:3001], 'binary','test')
+    precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_test[967:,:], y_test[967:], 'binary','dev')
+    precision, recall, f1_score,precisionw, recallw, f1_scorew,precisionm, recallm, f1_scorem =evaluate_model(model, X_test[:967,:], y_test[:967], 'binary','test')
     
 if __name__ == "__main__":
     TOKENIZER = 'glove'
