@@ -1,5 +1,6 @@
 #from data_handler import get_data
 from models import get_model
+import random
 from netcal.metrics import ECE
 import argparse
 import pickle
@@ -194,6 +195,7 @@ def load_data(dataset):
     if dataset =='train':
         print("Loading data from file: " + dataset)
         data = pickle.load(open('drive/My Drive/Colab Notebooks/hate_speech_data/Data/Waseem_Dataset.pkl', 'rb'))
+        random.shuffle(data)
         print('len(dataaaaaa)')
         print(len(data))
         for i in range(len(data)):
