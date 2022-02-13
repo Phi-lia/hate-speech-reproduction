@@ -9,6 +9,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 import tflearn
 from sklearn.metrics import make_scorer, f1_score, accuracy_score, recall_score, precision_score, classification_report, precision_recall_fscore_support
 from auxiliares import *
+import random
 
 
 #Réplica del experimento original descrito en la literatura
@@ -19,7 +20,16 @@ def run_model_exp1(oversampling_rate, vector_type, embed_size,flag):
         model_type = "blstm"
     
     x_text, labels = load_data('train')
-    print(len(labels))    
+    # c = list(zip(x_text, labels))
+    # random.shuffle(c)
+    # x_text, labels = zip(*c)
+
+    x1 = x_text[:7334]
+    l1 = labels[:7334]
+    x2 = x_text[7334:]
+    l2 = labels[7334:]
+    x_text, labels = x1, l1
+
     #Oversampling before cross-validation
     x_text, labels = oversampling(x_text, labels,oversampling_rate)
     
@@ -56,15 +66,15 @@ def run_model_exp1(oversampling_rate, vector_type, embed_size,flag):
         fn += f1_score
     print_scores(e, p, p1, r,r1, f1, f11,pn, rn, fn,NO_OF_FOLDS)
     
-    X_test1, y_test1 = load_data('test')
-    data_dict = data_processor(x_text,X_train,y_train,X_test1,y_test1,flag)
+    #X_test1, y_test1 = load_data('test')
+    data_dict = data_processor(x_text,x1,l1,x2,l2,flag)
     testX1 = data_dict['testX']
     testY1 = data_dict['testY']
     trainX1 = data_dict['trainX']
     trainY1 = data_dict['trainY']
     evaluate_model(model, trainX1, trainY1,flag, "train")
-    evaluate_model(model, testX1[:3001,:], testY1[:3001],flag, 'test')
-    evaluate_model(model, testX1[3001:,:], testY1[3001:],flag, 'dev')
+    evaluate_model(model, testX1[:967,:], testY1[:967],flag, 'test')
+    evaluate_model(model, testX1[967:,:], testY1[967:],flag, 'dev')
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Experiment 1. Original Experiment Replica')
